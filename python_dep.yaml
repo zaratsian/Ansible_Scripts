@@ -1,0 +1,106 @@
+# ansible-playbook -i hosts test.yaml
+- hosts: all
+
+  remote_user: centos
+  #become: yes
+  #become_user: hdfs
+  #become_method: su
+
+  tasks:
+
+  ########################################################
+  #
+  #   Current Python Version
+  #
+  ########################################################
+  - name: Capture Python Version
+    command: python --version
+    register: python_version
+
+  - debug: msg="{{ python_version.stderr }}"
+
+  ########################################################
+  #
+  #   Current User
+  #
+  ########################################################
+  - name: Capture Python Version
+    command: whoami
+    register: current_user
+
+  - debug: msg="{{ current_user.stdout }}"
+
+  ########################################################
+  #
+  #   Cleanup / Remove Existing MiniConda Env
+  #
+  ########################################################
+  - name: Remove miniconda env in /opt
+    become: yes
+    become_user: root
+    become_method: sudo
+    command: rm -rf /opt/miniconda
+
+  - name: Remove existing miniconda.sh
+    become: yes
+    become_user: root
+    become_method: sudo
+    command: rm -rf /tmp/miniconda.sh
+
+  ########################################################
+  #
+  #   Install MiniConda
+  #
+  ########################################################
+  - name: Download MiniConda
+    command: wget http://repo.continuum.io/miniconda/Miniconda3-3.7.0-Linux-x86_64.sh -O miniconda.sh
+    args:
+      chdir: /tmp/
+
+  - name: chmod file
+    command: chmod +x /tmp/miniconda.sh
+
+  - name: Install bzip2 (for Centos)
+    become: yes
+    become_user: root
+    become_method: sudo
+    command: yum install -y bzip2
+
+  - name: Install MiniConda
+    become: yes
+    become_user: root
+    become_method: sudo
+    command: /tmp/miniconda.sh -b -p /opt/miniconda
+
+  #- name: 
+  #  command: export PATH="$HOME/miniconda/bin:$PATH"
+
+  ########################################################
+  #
+  #   Install Python Packages
+  #
+  ########################################################
+  - name: Install python packages
+    become: yes
+    become_user: root
+    become_method: sudo
+    command: "/opt/miniconda/bin/conda install {{ item }}"
+    with_items:
+      - numpy
+      - pandas
+    responses:
+      Questions:
+        - 'y'
+
+
+##########################################################################################
+#
+# NOTES:
+#
+#   "command" is more secure than "shell". However, "shell" uses env variables. Some 
+#   stream operations will also note work with "command", such as >, &, etc.
+#
+#
+##########################################################################################
+
+#ZEND
