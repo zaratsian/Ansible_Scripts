@@ -1,13 +1,13 @@
-# ansible-playbook -i hosts test.yaml
+# ansible-playbook -i ~/Downloads/hosts ~/Dropbox/code/scripts/ansible_miniconda.yaml
 - hosts: all
-
+  
   remote_user: centos
   #become: yes
   #become_user: hdfs
   #become_method: su
-
+  
   tasks:
-
+  
   ########################################################
   #
   #   Current Python Version
@@ -16,9 +16,9 @@
   - name: Capture Python Version
     command: python --version
     register: python_version
-
+  
   - debug: msg="{{ python_version.stderr }}"
-
+  
   ########################################################
   #
   #   Current User
@@ -27,9 +27,9 @@
   - name: Capture Python Version
     command: whoami
     register: current_user
-
+  
   - debug: msg="{{ current_user.stdout }}"
-
+  
   ########################################################
   #
   #   Cleanup / Remove Existing MiniConda Env
@@ -40,13 +40,25 @@
     become_user: root
     become_method: sudo
     command: rm -rf /opt/miniconda
-
+  
   - name: Remove existing miniconda.sh
     become: yes
     become_user: root
     become_method: sudo
     command: rm -rf /tmp/miniconda.sh
-
+  
+  - name: Remove anaconda env in /opt
+    become: yes
+    become_user: root
+    become_method: sudo
+    command: rm -rf /opt/anaconda
+  
+  - name: Remove existing anaconda.sh
+    become: yes
+    become_user: root
+    become_method: sudo
+    command: rm -rf /tmp/anaconda.sh
+  
   ########################################################
   #
   #   Install MiniConda
@@ -56,28 +68,28 @@
     command: wget http://repo.continuum.io/miniconda/Miniconda3-3.7.0-Linux-x86_64.sh -O miniconda.sh
     args:
       chdir: /tmp/
-
+  
   - name: chmod file
     command: chmod +x /tmp/miniconda.sh
-
+  
   - name: Install bzip2 (for Centos)
     become: yes
     become_user: root
     become_method: sudo
     command: yum install -y bzip2
-
+  
   - name: Install MiniConda
     become: yes
     become_user: root
     become_method: sudo
     command: /tmp/miniconda.sh -b -p /opt/miniconda
-
+  
   #- name: 
-  #  command: export PATH="$HOME/miniconda/bin:$PATH"
-
+  #  command: export PATH="/opt/miniconda/bin:$PATH"
+  
   ########################################################
   #
-  #   Install Python Packages
+  #   Install Python MiniConda Packages
   #
   ########################################################
   - name: Install python packages
@@ -91,11 +103,42 @@
     responses:
       Questions:
         - 'y'
+  
+  ########################################################
+  #
+  #   Install Anaconda 3.x
+  #
+  ########################################################
+  - name: Download Anaconda
+    command: wget https://repo.anaconda.com/archive/Anaconda3-5.1.0-Linux-x86_64.sh -O anaconda.sh
+    args:
+      chdir: /tmp/
+  
+  - name: chmod file
+    command: chmod +x /tmp/anaconda.sh
+  
+  - name: Install bzip2 (for Centos)
+    become: yes
+    become_user: root
+    become_method: sudo
+    command: yum install -y bzip2
+  
+  - name: Install Anaconda
+    become: yes
+    become_user: root
+    become_method: sudo
+    command: /tmp/anaconda.sh -b -p /opt/anaconda
+  
+  #- name: 
+  #  command: export PATH="/opt/anaconda/bin:$PATH"
+
 
 
 ##########################################################################################
 #
 # NOTES:
+#
+#   http://docs.ansible.com/ansible/latest/index.html
 #
 #   "command" is more secure than "shell". However, "shell" uses env variables. Some 
 #   stream operations will also note work with "command", such as >, &, etc.
