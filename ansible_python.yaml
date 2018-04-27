@@ -1,5 +1,12 @@
-# ansible-playbook -i ~/Downloads/hosts ~/Dropbox/code/scripts/ansible_miniconda.yaml
+# ansible-playbook -i ~/Downloads/hosts ~/Dropbox/code/scripts/ansible_python.yaml
 - hosts: all
+  ########################################################
+  # ./hosts file contains:
+  #
+  # dzaratsian3.field.hortonworks.com
+  # dzaratsian4.field.hortonworks.com
+  # dzaratsian5.field.hortonworks.com 
+  ########################################################
   
   remote_user: centos
   #become: yes
@@ -20,7 +27,7 @@
   - debug: msg="{{ python_version.stderr }}"
   
   ########################################################
-  #
+  # 
   #   Current User
   #
   ########################################################
@@ -130,9 +137,15 @@
     command: /tmp/anaconda.sh -b -p /opt/anaconda
   
   #- name: 
-  #  command: export PATH="/opt/anaconda/bin:$PATH"
-
-
+  #  command: echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> ~/.bashrc
+  #- name: 
+  #  command: echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> /home/centos/.bashrc
+  #- name: 
+  #  command: echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> /home/hdfs/.bashrc
+  #- name: 
+  #  command: echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> /home/zeppelin/.bashrc
+  #- name: 
+  #  command: echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> /home/spark/.bashrc
 
 ##########################################################################################
 #
