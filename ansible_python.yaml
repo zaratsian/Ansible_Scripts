@@ -1,5 +1,6 @@
 # ansible-playbook -i ~/Downloads/hosts ~/Dropbox/code/scripts/ansible_python.yaml
-- hosts: all
+# ansible-playbook -i ~/Downloads/hosts ~/Dropbox/code/scripts/ansible_python.yaml --tags "anaconda"
+- hosts: hortonworks
   ########################################################
   # ./hosts file contains:
   #
@@ -14,138 +15,169 @@
   #become_method: su
   
   tasks:
-  
-  ########################################################
-  #
-  #   Current Python Version
-  #
-  ########################################################
-  - name: Capture Python Version
-    command: python --version
-    register: python_version
-  
-  - debug: msg="{{ python_version.stderr }}"
-  
-  ########################################################
-  # 
-  #   Current User
-  #
-  ########################################################
-  - name: Capture Python Version
-    command: whoami
-    register: current_user
-  
-  - debug: msg="{{ current_user.stdout }}"
-  
-  ########################################################
-  #
-  #   Cleanup / Remove Existing MiniConda Env
-  #
-  ########################################################
-  - name: Remove miniconda env in /opt
-    become: yes
-    become_user: root
-    become_method: sudo
-    command: rm -rf /opt/miniconda
-  
-  - name: Remove existing miniconda.sh
-    become: yes
-    become_user: root
-    become_method: sudo
-    command: rm -rf /tmp/miniconda.sh
-  
-  - name: Remove anaconda env in /opt
-    become: yes
-    become_user: root
-    become_method: sudo
-    command: rm -rf /opt/anaconda
-  
-  - name: Remove existing anaconda.sh
-    become: yes
-    become_user: root
-    become_method: sudo
-    command: rm -rf /tmp/anaconda.sh
-  
-  ########################################################
-  #
-  #   Install MiniConda
-  #
-  ########################################################
-  - name: Download MiniConda
-    command: wget http://repo.continuum.io/miniconda/Miniconda3-3.7.0-Linux-x86_64.sh -O miniconda.sh
-    args:
-      chdir: /tmp/
-  
-  - name: chmod file
-    command: chmod +x /tmp/miniconda.sh
-  
-  - name: Install bzip2 (for Centos)
-    become: yes
-    become_user: root
-    become_method: sudo
-    command: yum install -y bzip2
-  
-  - name: Install MiniConda
-    become: yes
-    become_user: root
-    become_method: sudo
-    command: /tmp/miniconda.sh -b -p /opt/miniconda
-  
-  #- name: 
-  #  command: export PATH="/opt/miniconda/bin:$PATH"
-  
-  ########################################################
-  #
-  #   Install Python MiniConda Packages
-  #
-  ########################################################
-  - name: Install python packages
-    become: yes
-    become_user: root
-    become_method: sudo
-    command: "/opt/miniconda/bin/conda install {{ item }}"
-    with_items:
-      - numpy
-      - pandas
-    responses:
-      Questions:
-        - 'y'
-  
-  ########################################################
-  #
-  #   Install Anaconda 3.x
-  #
-  ########################################################
-  - name: Download Anaconda
-    command: wget https://repo.anaconda.com/archive/Anaconda3-5.1.0-Linux-x86_64.sh -O anaconda.sh
-    args:
-      chdir: /tmp/
-  
-  - name: chmod file
-    command: chmod +x /tmp/anaconda.sh
-  
-  - name: Install bzip2 (for Centos)
-    become: yes
-    become_user: root
-    become_method: sudo
-    command: yum install -y bzip2
-  
-  - name: Install Anaconda
-    become: yes
-    become_user: root
-    become_method: sudo
-    command: /tmp/anaconda.sh -b -p /opt/anaconda
-  
-  #- name: 
-  #  command: echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> ~/.bashrc
-  #- name: 
-  #  command: echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> /home/centos/.bashrc
-  #- name: 
-  #  command: echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> /home/hdfs/.bashrc
-  #- name: 
-  #  command: echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> /home/zeppelin/.bashrc
-  #- name: 
-  #  command: echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> /home/spark/.bashrc
+    
+    ########################################################  
+    #
+    #   Current Python Version
+    #
+    ########################################################
+    - name: Capture Initial Python Version
+      command: python --version
+      register: python_version
+      tags: anaconda, miniconda
+    
+    - debug: msg="{{ python_version.stderr }}"
+      tags: anaconda, miniconda
+    
+    ########################################################
+    # 
+    #   Current User
+    #
+    ########################################################
+    - name: Capture Current User
+      command: whoami
+      register: current_user
+      tags: anaconda, miniconda
+    
+    - debug: msg="{{ current_user.stdout }}"
+      tags: anaconda, miniconda
+    
+    ########################################################
+    #
+    #   Cleanup / Remove Existing Envs
+    #
+    ########################################################
+    - name: Remove miniconda env in /opt
+      become: yes
+      become_user: root
+      become_method: sudo
+      command: rm -rf /opt/miniconda
+      tags: miniconda
+    
+    - name: Remove existing miniconda.sh
+      become: yes
+      become_user: root
+      become_method: sudo
+      command: rm -rf /tmp/miniconda.sh
+      tags: miniconda
+    
+    - name: Remove anaconda env in /opt
+      become: yes
+      become_user: root
+      become_method: sudo
+      command: rm -rf /opt/anaconda
+      tags: anaconda
+    
+    - name: Remove existing anaconda.sh
+      become: yes
+      become_user: root
+      become_method: sudo
+      command: rm -rf /tmp/anaconda.sh
+      tags: anaconda
+    
+    ########################################################
+    #
+    #   Install MiniConda
+    #
+    ########################################################
+    - name: Download MiniConda
+      command: wget http://repo.continuum.io/miniconda/Miniconda3-3.7.0-Linux-x86_64.sh -O miniconda.sh
+      args:
+        chdir: /tmp/
+      tags: miniconda
+    
+    - name: chmod file
+      command: chmod +x /tmp/miniconda.sh
+      tags: miniconda
+    
+    - name: Install bzip2 (for Centos)
+      become: yes
+      become_user: root
+      become_method: sudo
+      command: yum install -y bzip2
+      tags: miniconda
+    
+    - name: Install MiniConda
+      become: yes
+      become_user: root
+      become_method: sudo
+      command: /tmp/miniconda.sh -b -p /opt/miniconda
+      tags: miniconda
+    
+    #- name: 
+    #  command: export PATH="/opt/miniconda/bin:$PATH"
+    #  tags: miniconda
+    
+    #- name: Install MiniConda python packages
+    #  become: yes
+    #  become_user: root
+    #  become_method: sudo
+    #  command: "/opt/miniconda/bin/conda install {{ item }}"
+    #  with_items:
+    #    - numpy
+    #    - pandas
+    #  responses:
+    #    Questions:
+    #      - 'y'
+    #  tags: miniconda
+    
+    ########################################################
+    #
+    #   Install Anaconda 3.x
+    #
+    ########################################################
+    - name: Download Anaconda
+      command: wget https://repo.anaconda.com/archive/Anaconda3-5.1.0-Linux-x86_64.sh -O anaconda.sh
+      args:
+        chdir: /tmp/
+      tags: anaconda
+    
+    - name: chmod file
+      command: chmod +x /tmp/anaconda.sh
+      tags: anaconda
+    
+    - name: Install bzip2 (for Centos)
+      become: yes
+      become_user: root
+      become_method: sudo
+      command: yum install -y bzip2
+      tags: anaconda
+    
+    - name: Install Anaconda
+      become: yes
+      become_user: root
+      become_method: sudo
+      command: /tmp/anaconda.sh -b -p /opt/anaconda
+      tags: anaconda
+    
+    - name: Add anaconda to centos .bashrc $PATH
+      shell: echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> ~/.bashrc
+      tags: anaconda, test
+    - name: Add anaconda to root .bashrc $PATH
+      become: yes
+      become_user: root
+      become_method: sudo
+      shell: echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> ~/.bashrc
+      tags: anaconda, test
+    - name: Add anaconda to hdfs .bashrc $PATH
+      become: yes
+      become_user: hdfs
+      become_method: sudo
+      shell: echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> ~/.bashrc
+      tags: anaconda, test
+    - name: Add anaconda to zeppelin .bashrc $PATH
+      become: yes
+      become_user: zeppelin
+      become_method: sudo
+      shell: echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> ~/.bashrc
+      tags: anaconda, test
+    - name: Add anaconda to spark .bashrc $PATH
+      become: yes
+      become_user: spark
+      become_method: sudo
+      shell: echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> ~/.bashrc
+      tags: anaconda, test
+
 
 ##########################################################################################
 #
