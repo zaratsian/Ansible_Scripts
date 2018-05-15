@@ -150,11 +150,11 @@
       become_method: sudo
       shell: "{{item}}"
       with_items:
-        - echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> ~/.bashrc
-        - echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> ~/.bashrc
-        - echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> ~/.bashrc
-        - echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> ~/.bashrc
-        - echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> ~/.bashrc
+        - echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> /root/.bashrc           # root
+        - echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> /home/centos/.bashrc    # centos
+        - echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> /home/zeppelin/.bashrc  # zeppelin
+        - echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> /home/spark/.bashrc     # spark
+        - echo '''export PATH="/opt/anaconda/bin:$PATH"''' >> /home/hdfs/.bashrc      # hdfs
 
 
 ##########################################################################################
